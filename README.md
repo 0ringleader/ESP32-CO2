@@ -98,3 +98,6 @@ Tip: In Arduino IDE go to Tools → Manage Libraries… and search for the names
 - Support multiple board/pin variants and a small config UI to set Wi-Fi and pins without recompiling.
 - Add automatic upload of history to cloud or local NAS (optional user-config).
 
+
+
+

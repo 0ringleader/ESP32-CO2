@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CO2 Monitor</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>CO2 Monitor Status</h1>
+
+  <div class="status-box">
+    <div id="co2-status-label">Current CO2 Level</div>
+    <div id="co2-status">... ppm</div>
+    <div id="co2-health-label">Loading...</div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-item">
+      <div id="temp-value" class="info-value">...°C</div>
+      <div class="info-label">Temperature</div>
+    </div>
+    <div class="info-item">
+      <div id="humidity-value" class="info-value">...%</div>
+      <div class="info-label">Humidity</div>
+    </div>
+  </div>
+
+  <div class="control-row">
+    <button id="measure-button" onclick="measureNow()">Force Measurement Now</button>
+    <div class="alert-control">
+      <span>Flash LED Alert (&gt; 2000 ppm)</span>
+      <label class="switch">
+        <input type="checkbox" id="alert-toggle" onchange="toggleAlert()">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="log-controls">
+    <a href="/download-log" class="btn btn-download">Download CSV Log</a>
+    <button class="btn btn-clear" onclick="clearLog()">Clear Log</button>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-header">
+      <h2>CO2 Level</h2>
+      <div class="chart-controls">
+        <button class="btn btn-small" onclick="resetZoom('co2')">Reset Zoom</button>
+        <button class="btn btn-small" onclick="loadMoreData()" id="load-more-btn">Load Older Data</button>
+      </div>
+    </div>
+    <div class="chart-hint">Scroll to zoom, drag to pan. Double-click to reset.</div>
+    <div class="chart-container">
+      <canvas id="co2Chart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-header">
+      <h2>Temperature</h2>
+      <button class="btn btn-small" onclick="resetZoom('temp')">Reset Zoom</button>
+    </div>
+    <div class="chart-hint">Scroll to zoom, drag to pan</div>
+    <div class="chart-container">
+      <canvas id="tempChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-header">
+      <h2>Humidity</h2>
+      <button class="btn btn-small" onclick="resetZoom('humidity')">Reset Zoom</button>
+    </div>
+    <div class="chart-hint">Scroll to zoom, drag to pan</div>
+    <div class="chart-container">
+      <canvas id="humidityChart"></canvas>
+    </div>
+  </div>
+
+  <div id="loading-indicator" class="loading-indicator" style="display: none;">
+    Loading more data...
+  </div>
+</div>
+
+<script src="/script.js"></script>
+</body>
+</html>
