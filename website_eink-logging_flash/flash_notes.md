@@ -1,7 +1,3 @@
-Read [](file:///home/alex/Documents/GitHub/ESP32-CO2/website_eink-logging_flash/flash_notes.md#1-1), lines 1 to 35
-
-I will update the flash_notes.md file to include the detailed setup instructions, including installing the LittleFS plugin, configuring the board settings (PSRAM, Partition Scheme), and the correct order of operations for the first flash.
-
 ```markdown
 # ESP32-S3 CO2 Monitor - Flash & Setup Guide
 
@@ -22,7 +18,7 @@ https://github.com/earlephilhower/arduino-littlefs-upload?tab=readme-ov-file
 
 Ensure your folder looks exactly like this:
 
-```
+
 website_eink-logging_flash/
 ├── website_eink-logging_flash.ino  # Main code
 ├── partitions.csv                  # Custom partition table
@@ -30,7 +26,6 @@ website_eink-logging_flash/
     ├── index.html
     ├── style.css
     └── script.js
-```
 
 ## 3. Board Configuration (Arduino IDE)
 
