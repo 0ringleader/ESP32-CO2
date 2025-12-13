@@ -1,41 +1,78 @@
-# Current Steps
+Read [](file:///home/alex/Documents/GitHub/ESP32-CO2/website_eink-logging_flash/flash_notes.md#1-1), lines 1 to 35
 
-## Folder structure after creating files
+I will update the flash_notes.md file to include the detailed setup instructions, including installing the LittleFS plugin, configuring the board settings (PSRAM, Partition Scheme), and the correct order of operations for the first flash.
+
+```markdown
+# ESP32-S3 CO2 Monitor - Flash & Setup Guide
+
+This version uses a custom partition table to maximize storage for logging and separates web assets (HTML/JS/CSS) into the LittleFS file system.
+
+## 1. Prerequisites
+
+### Install LittleFS Upload Plugin
+To upload the web files (`data/` folder) to the ESP32, you need the LittleFS uploader tool.
+
+1. Follow the install steps here:
+https://github.com/earlephilhower/arduino-littlefs-upload?tab=readme-ov-file
+
+
+2.  Restart Arduino IDE.
+
+## 2. Project Structure
+
+Ensure your folder looks exactly like this:
 
 ```
 website_eink-logging_flash/
-├── website_eink-logging_flash.ino
-├── partitions.csv
-└── data/
+├── website_eink-logging_flash.ino  # Main code
+├── partitions.csv                  # Custom partition table
+└── data/                           # Web server files
     ├── index.html
     ├── style.css
     └── script.js
 ```
 
-## How to upload
+## 3. Board Configuration (Arduino IDE)
 
-1. **Upload the sketch** (Arduino IDE):
-   - Select board: `ESP32S3 Dev Module`
-   - Select partition scheme: `Custom partition table (in sketch)`
-   - Set Flash Size: `16MB`
-   - Upload the `.ino` file
+Select **Tools** and configure the following settings for the ESP32-S3 N16R8:
 
-2. **Upload the LittleFS data** (web assets):
-   - Install the "ESP32 LittleFS Data Upload" plugin for Arduino IDE
-   - Tools → ESP32 Sketch Data Upload
-   - This uploads contents of the `data/` folder to the LittleFS partition
+*   **Board:** `ESP32S3 Dev Module`
+*   **Flash Size:** `16MB (128Mb)`
+*   **Partition Scheme:** `Custom partition table (in sketch)` (Crucial!)
+*   **PSRAM:** `OPI PSRAM`
+*   **Erase All Flash Before Sketch Upload:** `Enabled` (Only for the very first upload to apply the new partition table)
 
-3. **First boot**: 
-   - The device creates `/log.csv` with a header automatically
-   - On subsequent boots it loads the last 144 samples into RAM for charts
-   - New data is appended to the CSV every 10 minutes
+## 4. Flashing Procedure
 
-## New features in this version
+**Step A: Upload the Firmware (Sketch)**
+1.  Connect your ESP32-S3 via USB.
+2.  Select the correct **Port**.
+3.  Click **Upload** (➡️) or press `Ctrl+U`.
+    *   *Note:* Since "Erase All Flash" is enabled, this might take a minute.
+    *   *After this step, the device will boot but the website will show "index.html not found". This is normal.*
 
-- **Persistent CSV logging** on LittleFS (`/log.csv`)
-- **Download CSV** button on web UI
-- **Clear log** button (with confirmation)
-- **Separate HTML/CSS/JS** served from LittleFS
-- **Auto log rotation** when file exceeds 10 MB
-- **Loads history on boot** from CSV into RAM buffer
+**Step B: Upload the Web Assets (LittleFS)**
+1.  **Important:** If you are on Linux/Mac, you might need to close the Serial Monitor first.
+2.  Open the Command Palette: `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac).
+3.  Type and select: `Upload LittleFS to ESP32`.
+    *   *Alternatively:* Go to **Tools > ESP32 LittleFS Data Upload**.
+4.  Wait for the "LittleFS Image Uploaded" message.
 
+**Step C: Finalize**
+1.  Go back to **Tools** and set **Erase All Flash Before Sketch Upload** to `Disabled` (to preserve your logs in the future).
+2.  Open the Serial Monitor (`115200` baud) and press the Reset button on the ESP32.
+3.  You should see:
+    ```
+    LittleFS mounted successfully
+    Listing files:
+      FILE: /index.html ...
+      FILE: /style.css ...
+      FILE: /script.js ...
+    ```
+
+## Features
+
+- **Persistent Logging:** Data is saved to `/log.csv` in flash memory every 10 minutes.
+- **Web Interface:** Charts with zoom, pan, and lazy loading of historical data.
+- **Management:** Download or Clear logs directly from the web UI.
+```

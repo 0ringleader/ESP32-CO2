@@ -174,7 +174,8 @@ void loop() {
 
 // *** LittleFS Initialization ***
 void init_littlefs() {
-  if (!LittleFS.begin(true)) {  // true = format if mount fails
+  // Explicitly use "spiffs" partition label to match partitions.csv
+  if (!LittleFS.begin(true, "/littlefs", 10, "spiffs")) { 
     Serial.println("LittleFS mount failed!");
     return;
   }
@@ -185,6 +186,19 @@ void init_littlefs() {
   size_t usedBytes = LittleFS.usedBytes();
   Serial.printf("LittleFS: Total: %u bytes, Used: %u bytes, Free: %u bytes\n",
                 totalBytes, usedBytes, totalBytes - usedBytes);
+
+  // List all files
+  Serial.println("Listing files:");
+  File root = LittleFS.open("/");
+  File file = root.openNextFile();
+  while(file){
+      Serial.print("  FILE: ");
+      Serial.print(file.name());
+      Serial.print("  SIZE: ");
+      Serial.println(file.size());
+      file = root.openNextFile();
+  }
+  root.close();
 
   // Create log file with header if it doesn't exist
   if (!LittleFS.exists(LOG_FILE)) {
@@ -255,23 +269,22 @@ void load_recent_history() {
   // Skip header
   f.readStringUntil('\n');
 
-  // Count lines first
+  // Count lines
   int lineCount = 0;
   while (f.available()) {
-    f.readStringUntil('\n');
-    lineCount++;
+    if(f.readStringUntil('\n').length() > 0) lineCount++;
   }
 
-  // Go back and read last MAX_SAMPLES lines
+  // Reset to start of data
   f.seek(0);
-  f.readStringUntil('\n');  // skip header again
+  f.readStringUntil('\n'); 
 
   int skipLines = (lineCount > MAX_SAMPLES) ? (lineCount - MAX_SAMPLES) : 0;
-  for (int i = 0; i < skipLines && f.available(); i++) {
+  for (int i = 0; i < skipLines; i++) {
     f.readStringUntil('\n');
   }
 
-  // Read remaining lines into buffer
+  // Reset RAM buffer
   history_index = 0;
   is_history_full = false;
 
@@ -280,7 +293,6 @@ void load_recent_history() {
     line.trim();
     if (line.length() == 0) continue;
 
-    // Parse: timestamp,co2,temperature,humidity
     int idx1 = line.indexOf(',');
     int idx2 = line.indexOf(',', idx1 + 1);
     int idx3 = line.indexOf(',', idx2 + 1);
@@ -295,12 +307,16 @@ void load_recent_history() {
   }
 
   f.close();
-  Serial.printf("Loaded %d history entries from flash\n", history_index);
-
+  
+  // Important: If we filled the buffer, mark it as full. 
+  // But since we just loaded it linearly, history_index points to the next free slot.
+  // If history_index == MAX_SAMPLES, we wrap to 0 and set full.
   if (history_index >= MAX_SAMPLES) {
     history_index = 0;
     is_history_full = true;
   }
+  
+  Serial.printf("Loaded %d history entries from flash\n", is_history_full ? MAX_SAMPLES : history_index);
 }
 
 // *** LED State ***
@@ -464,13 +480,6 @@ void handleStatusApi() {
   server.send(200, "application/json", json);
 }
 
-void handleHistoryApi() {
-  String json = "{\"history\":[";
-  json += generateHistoryJson();
-  json += "]}";
-  server.send(200, "application/json", json);
-}
-
 // Update handleHistoryApi to support pagination
 void handleHistoryApi() {
   int page = 0;
@@ -510,41 +519,46 @@ String generateHistoryFromFlash(int page, int pageSize) {
   // Skip header
   f.readStringUntil('\n');
 
-  // Count total lines
-  int totalLines = 0;
+  // Count total data lines (excluding header)
+  int totalDataLines = 0;
   while (f.available()) {
-    f.readStringUntil('\n');
-    totalLines++;
+    if (f.readStringUntil('\n').length() > 0) {
+      totalDataLines++;
+    }
   }
 
-  // Calculate offset for this page
-  // Page 1 = data before the RAM buffer (entries 0 to totalLines - MAX_SAMPLES - 1)
-  // We read backwards from the end of file
-  int ramBufferStart = max(0, totalLines - MAX_SAMPLES);
-  int pageStart = ramBufferStart - (page * pageSize);
-  int pageEnd = pageStart + pageSize;
+  // We want to read data *before* what is in RAM.
+  // RAM has the last MAX_SAMPLES.
+  // So we are looking for lines from index 0 to (totalDataLines - MAX_SAMPLES - 1).
   
-  if (pageStart < 0) {
-    // No more data
-    f.close();
-    return "],\"hasMore\":false,\"page\":" + String(page);
+  int availableHistoryLines = max(0, totalDataLines - MAX_SAMPLES);
+  
+  // Calculate range for this page (reading backwards from the end of available history)
+  // Page 1: gets the most recent 'pageSize' lines from availableHistoryLines
+  int endIndex = availableHistoryLines - ((page - 1) * pageSize); 
+  int startIndex = endIndex - pageSize;
+
+  // Adjust bounds
+  if (endIndex <= 0) {
+     f.close();
+     return "],\"hasMore\":false,\"page\":" + String(page);
   }
   
-  pageStart = max(0, pageStart);
-  pageEnd = min(pageEnd, ramBufferStart);
-
-  // Seek back to beginning and skip to our page
+  startIndex = max(0, startIndex);
+  
+  // Seek back to start of data
   f.seek(0);
-  f.readStringUntil('\n');  // skip header
-  
-  for (int i = 0; i < pageStart && f.available(); i++) {
+  f.readStringUntil('\n'); // Skip header
+
+  // Skip to startIndex
+  for (int i = 0; i < startIndex; i++) {
     f.readStringUntil('\n');
   }
 
-  // Read the page data
   String data = "";
   int count = 0;
-  while (f.available() && count < (pageEnd - pageStart)) {
+  // Read up to endIndex
+  while (f.available() && count < (endIndex - startIndex)) {
     String line = f.readStringUntil('\n');
     line.trim();
     if (line.length() == 0) continue;
@@ -554,18 +568,21 @@ String generateHistoryFromFlash(int page, int pageSize) {
     int idx3 = line.indexOf(',', idx2 + 1);
 
     if (idx1 > 0 && idx2 > idx1 && idx3 > idx2) {
+      // Prepend data because we are reading oldest-to-newest within this chunk, 
+      // but the client expects the chunk to fit into the timeline.
+      // Actually, the client sorts/appends based on timestamp usually, but let's send it in order.
       if (data.length() > 0) data += ",";
       data += "{\"timestamp\":" + line.substring(0, idx1) + ",";
       data += "\"co2\":" + line.substring(idx1 + 1, idx2) + ",";
       data += "\"temperature\":" + line.substring(idx2 + 1, idx3) + ",";
       data += "\"humidity\":" + line.substring(idx3 + 1) + "}";
-      count++;
     }
+    count++;
   }
 
   f.close();
   
-  bool hasMore = (pageStart > 0);
+  bool hasMore = (startIndex > 0);
   return data + "],\"hasMore\":" + String(hasMore ? "true" : "false") + ",\"page\":" + String(page);
 }
 
@@ -703,7 +720,7 @@ int getCO2Color(uint16_t co2) {
 
 const char* getCO2Status(uint16_t co2) {
   if (co2 < 800) return "Good";
-  if (co2 < 1200) return "Moderate";
-  if (co2 < 1500) return "High";
-  return "Very High";
+  else if (co2 < 1200) return "Moderate";
+  else if (co2 < 1500) return "High";
+  else return "Very High";
 }

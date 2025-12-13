@@ -199,15 +199,16 @@ function fetchHistory(page = 0, append = false) {
     .then(data => {
       if (data.history && data.history.length > 0) {
         if (append) {
-          // Prepend older data
-          allData = [...data.history, ...allData];
+          // Prepend older data (since we are fetching backwards in time)
+          // Sort by timestamp to be safe
+          allData = [...data.history, ...allData].sort((a, b) => a.timestamp - b.timestamp);
         } else {
-          allData = data.history;
+          allData = data.history.sort((a, b) => a.timestamp - b.timestamp);
         }
         updateCharts();
         
         // Check if there's more data
-        hasMoreData = data.hasMore !== false && data.history.length >= PAGE_SIZE;
+        hasMoreData = data.hasMore; // Use the server's flag directly
       } else {
         hasMoreData = false;
       }

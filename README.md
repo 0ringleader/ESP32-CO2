@@ -36,6 +36,7 @@
 Notes:
 - If your board uses different pins, change the `#define` constants at the top of `website_eInk-RAM_only.ino`.
 - The sketch uses software pin numbers directly; these correspond to the GPIO numbers on your ESP32-S3 board.
+- To use the serial monitor set the rate to 115200 baud 
 
 **Arduino IDE — required libraries**
 Install the following via the Arduino Library Manager (or PlatformIO equivalents):
