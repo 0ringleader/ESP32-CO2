@@ -15,7 +15,7 @@ https://github.com/earlephilhower/arduino-littlefs-upload?tab=readme-ov-file
 ## 2. Project Structure
 
 Ensure your folder looks exactly like this:
-
+```
 website_eink-logging_flash/
 ├── website_eink-logging_flash.ino  # Main code
 ├── partitions.csv                  # Custom partition table
@@ -23,7 +23,7 @@ website_eink-logging_flash/
     ├── index.html
     ├── style.css
     └── script.js
-
+```
 ## 3. Board Configuration (Arduino IDE)
 
 Select **Tools** and configure the following settings for the ESP32-S3 N16R8:
