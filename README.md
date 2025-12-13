@@ -5,8 +5,8 @@
 
 **Images**
 
-- **Built Module:** ![Built module (sample1)](website_eink-logging_flash/images/sample1.jpg)
-- **Web UI:** ![Web UI screenshot](website_eink-logging_flash/images/website.png)
+- **Built Module:** ![Built module (sample1)](sample1.jpg)
+- **Web UI:** ![Web UI screenshot](website.png)
 
 _Captions: Left — assembled module with E-Ink. Right — web UI showing live values and charts._
 
