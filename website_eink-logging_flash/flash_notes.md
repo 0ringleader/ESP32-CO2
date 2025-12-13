@@ -1,4 +1,3 @@
-```markdown
 # ESP32-S3 CO2 Monitor - Flash & Setup Guide
 
 This version uses a custom partition table to maximize storage for logging and separates web assets (HTML/JS/CSS) into the LittleFS file system.
@@ -11,13 +10,11 @@ To upload the web files (`data/` folder) to the ESP32, you need the LittleFS upl
 1. Follow the install steps here:
 https://github.com/earlephilhower/arduino-littlefs-upload?tab=readme-ov-file
 
-
 2.  Restart Arduino IDE.
 
 ## 2. Project Structure
 
 Ensure your folder looks exactly like this:
-
 
 website_eink-logging_flash/
 ├── website_eink-logging_flash.ino  # Main code
@@ -35,7 +32,7 @@ Select **Tools** and configure the following settings for the ESP32-S3 N16R8:
 *   **Flash Size:** `16MB (128Mb)`
 *   **Partition Scheme:** `Custom partition table (in sketch)` (Crucial!)
 *   **PSRAM:** `OPI PSRAM`
-*   **Erase All Flash Before Sketch Upload:** `Enabled` (Only for the very first upload to apply the new partition table)
+*   **Erase All Flash Before Sketch Upload:** `Enabled` (Only for the very first upload to apply the new partition table, after that turn it off.)
 
 ## 4. Flashing Procedure
 
@@ -70,4 +67,3 @@ Select **Tools** and configure the following settings for the ESP32-S3 N16R8:
 - **Persistent Logging:** Data is saved to `/log.csv` in flash memory every 10 minutes.
 - **Web Interface:** Charts with zoom, pan, and lazy loading of historical data.
 - **Management:** Download or Clear logs directly from the web UI.
-```
