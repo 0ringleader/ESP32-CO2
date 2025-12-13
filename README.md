@@ -3,6 +3,13 @@
 **Project:**  
 - **Goal:** Build a small CO2 / temperature / humidity monitor with an e-ink display and a web UI. Current version shows readings on the e-ink screen and via a local website. Future versions will add persistent logging (onboard flash or USB drive).
 
+**Images**
+
+- **Built Module:** ![Built module (sample1)](website_eink-logging_flash/images/sample1.jpg)
+- **Web UI:** ![Web UI screenshot](website_eink-logging_flash/images/website.png)
+
+_Captions: Left — assembled module with E-Ink. Right — web UI showing live values and charts._
+
 **Hardware used (current):**
 - **Controller:** Chinese ESP32-S3 dev kit (note: many S3 dev kits do not provide 5V from the header — check power requirements)  
 - **CO2 / Temp / Humidity sensor:** Sensirion SCD41 (SCD4x family)  

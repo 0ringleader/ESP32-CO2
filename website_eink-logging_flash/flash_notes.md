@@ -2,6 +2,12 @@
 
 This version uses a custom partition table to maximize storage for logging and separates web assets (HTML/JS/CSS) into the LittleFS file system.
 
+**Website / Logging Screenshot**
+
+- **Website Logging:** ![Website logging screenshot](website_eink-logging_flash/images/website-logging.png)
+
+_This screenshot shows the web UI with logged data, the download/clear log buttons and chart zoom/pan controls._
+
 ## 1. Prerequisites
 
 ### Install LittleFS Upload Plugin
