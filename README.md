@@ -6,7 +6,7 @@
 **Images**
 
 - **Built Module:** ![Built module (sample1)](sample1.jpg)
-- **Web UI:** ![Web UI screenshot](website.png)
+- **Web UI:** ![Web UI screenshot](website.jpg)
 
 _Captions: Left — assembled module with E-Ink. Right — web UI showing live values and charts._
 
