@@ -29,7 +29,7 @@ bool flash_alert_enabled = true;
 #define MAX_LOG_SIZE (10 * 1024 * 1024)  // 10 MB max log size, then rotate
 
 // RAM buffer for recent data (for charts - last 24h)
-#define MAX_SAMPLES 144
+#define MAX_SAMPLES 288
 struct SensorData {
   uint16_t co2;
   float temperature;
@@ -239,9 +239,10 @@ void log_data_to_flash(uint16_t co2, float temperature, float humidity) {
   }
 
   time_t now = time(nullptr);
-  f.printf("%ld,%u,%.2f,%.2f\n", now, co2, temperature, humidity);
+  // Cast now to long to ensure correct printf formatting (fixes argument shifting if time_t is 64-bit)
+  f.printf("%ld,%u,%.2f,%.2f\n", (long)now, co2, temperature, humidity);
   f.close();
-  Serial.printf("Logged to flash: %ld,%u,%.2f,%.2f\n", now, co2, temperature, humidity);
+  Serial.printf("Logged to flash: %ld,%u,%.2f,%.2f\n", (long)now, co2, temperature, humidity);
 }
 
 // *** Log data to RAM buffer (for charts) ***
@@ -366,7 +367,10 @@ void init_wifi() {
 
 // *** NTP Time ***
 void init_time() {
-  configTime(3600, 3600, "pool.ntp.org");
+  configTime(0, 0, "pool.ntp.org");
+  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);
+  tzset();
+
   Serial.println("Waiting for NTP time synchronization...");
   time_t now = time(nullptr);
   while (now < 8 * 3600 * 2) {
@@ -503,7 +507,7 @@ void handleHistoryApi() {
   } else {
     // Page > 0: read older data from flash CSV
     json += generateHistoryFromFlash(page, pageSize);
-    json += "]}";
+    json += "}"; // Fixed: removed extra "]" which caused JSON syntax error
   }
   
   server.send(200, "application/json", json);

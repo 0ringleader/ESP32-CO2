@@ -93,15 +93,15 @@ function formatTimeLabel(timestamp) {
   const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
   
   if (diffDays === 0) {
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   } else if (diffDays === 1) {
-    return 'Yesterday ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return 'Yesterday ' + date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   } else if (diffDays < 7) {
-    return date.toLocaleDateString('en-US', { weekday: 'short' }) + ' ' + 
-           date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString('de-DE', { weekday: 'short' }) + ' ' + 
+           date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   } else {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
-           date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' }) + ' ' +
+           date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   }
 }
 
@@ -140,7 +140,7 @@ function updateDataRangeInfo() {
   const oldest = new Date(allData[0].timestamp * 1000);
   const newest = new Date(allData[allData.length - 1].timestamp * 1000);
   
-  const rangeText = `Showing ${allData.length} samples from ${oldest.toLocaleString()} to ${newest.toLocaleString()}`;
+  const rangeText = `Showing ${allData.length} samples from ${oldest.toLocaleString('de-DE')} to ${newest.toLocaleString('de-DE')}`;
   
   let rangeEl = document.getElementById('data-range-info');
   if (!rangeEl) {
