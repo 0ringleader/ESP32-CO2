@@ -10,6 +10,7 @@
 
 _Captions: Left — assembled module with E-Ink. Right — web UI showing live values and charts._
 
+
 **Hardware used (current):**
 - **Controller:** Chinese ESP32-S3 dev kit (note: many S3 dev kits do not provide 5V from the header — check power requirements)  
 - **CO2 / Temp / Humidity sensor:** Sensirion SCD41 (SCD4x family)  
@@ -38,6 +39,9 @@ _Captions: Left — assembled module with E-Ink. Right — web UI showing live v
 | **SDA**   | **GPIO 8**   | I2C Data |
 | **SCL**   | **GPIO 9**   | I2C Clock |
 
+
+**Persistent logging / LittleFS**
+- If you want persistent logging and to upload the web assets to the device, see `website_eink-logging_flash/flash_notes.md` for step-by-step instructions (LittleFS uploader, partition setup, first-time "Erase all flash", and upload order).
 
 
 Notes:
